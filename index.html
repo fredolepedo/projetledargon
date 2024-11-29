@@ -1,0 +1,83 @@
+<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+    <head>
+        <title></title>
+    
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor msdt:dt="string">Antoine Legault</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor>
+<mso:Order msdt:dt="string">2924900.00000000</mso:Order>
+<mso:_ExtendedDescription msdt:dt="string"></mso:_ExtendedDescription>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author msdt:dt="string">Antoine Legault</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author>
+<mso:ComplianceAssetId msdt:dt="string"></mso:ComplianceAssetId>
+<mso:TriggerFlowInfo msdt:dt="string"></mso:TriggerFlowInfo>
+<mso:ContentTypeId msdt:dt="string">0x010100B952A900B8F4CE4C82936822EA8AD880</mso:ContentTypeId>
+<mso:_SourceUrl msdt:dt="string"></mso:_SourceUrl>
+<mso:_SharedFileIndex msdt:dt="string"></mso:_SharedFileIndex>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+
+    <body>
+        <h1>My awesome space</h1>        
+        <button onclick="onClickOnOff('ON')">ON</button>
+        <button onclick="onClickOnOff('OFF')">OFF</button>
+        <p id='txtId'>...</p>
+        
+        <script>
+            //Paramètres de votre Photon
+            const deviceID = "0a10aced202194944a044b58";
+            const accessToken = "913276c0929504fbf4dcb19105a49f0c8ff49e77";
+            const funcName = "onLEDStateChange";
+            var varName = "buttonStateStr";
+            
+            //Quand cette page web s'ouvre, appeler la fonction onGetButtonState à chaque seconde
+            setInterval(getButtonState, 1000);
+
+            function onClickOnOff(value) {
+                //Préparer le URL
+                const requestURL = `https://api.particle.io/v1/devices/${deviceID}/${funcName}?access_token=${accessToken}`;
+                const xhr = new XMLHttpRequest();
+                
+                //Préparer et envoyer les paramètres pour appeler une fonction au photon
+                xhr.open('POST', requestURL);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                const params = `args=${value}`;
+                xhr.send(params);
+
+                //Écrire sur le UI pour confirmer que l'envoie est en chemin
+                document.getElementById('txtId').innerHTML = "Sending...";
+            }
+
+            //Demander l'état du bouton du photon
+            function getButtonState() {
+                //Préparer le URL
+                const requestURL = `https://api.particle.io/v1/devices/${deviceID}/${varName}?access_token=${accessToken}`;
+                const xhr = new XMLHttpRequest();                
+                xhr.open('GET', requestURL);
+                
+                //Réponse du photon
+                xhr.onload = function() {
+                    //Succès
+                    if (xhr.status === 200) {
+                        //Convertir le String en objet JSON
+                        const data = JSON.parse(xhr.responseText);
+
+                        //Imprimer la valeur de 'result' dans le JSON
+                        console.log(data.result);
+                        document.getElementById('txtId').innerHTML = data.result;
+                    } 
+                    //Erreur
+                    else {
+                        console.error('Request failed. Returned status of ' + xhr.status);
+                    }
+                };
+
+                //Envoyer au photon
+                xhr.send();
+            }
+
+        </script>
+        
+    </body>
+
+</html>
